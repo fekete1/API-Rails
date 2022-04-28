@@ -1,0 +1,15 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  data: 
+  status: 1
+  user_id: 1
+  checkin_at: 2021-12-07 07:44:12
+  checkout_at: 2021-12-07 07:44:12
+
+two:
+  data: 
+  status: 1
+  user_id: 1
+  checkin_at: 2021-12-07 07:44:12
+  checkout_at: 2021-12-07 07:44:12

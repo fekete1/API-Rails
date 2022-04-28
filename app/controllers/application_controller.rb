@@ -1,11 +1,20 @@
 class ApplicationController < ActionController::API
 
+	def json_response( payload ,status, errors=nil )
+
+		if errors.nil? #Sucessfull request
+			render json: {status: "sucess", payload: payload}, status: status
+		else #Failed request
+			render json: {status: "failure", payload: payload, errors: errors}, status: status
+		end
+	end
+
 	# 404
 	def not_found(errors=nil)
 		if errors.nil?
-			render json: {errors: "Resource not found"}, status: :not_found
+			json_response(errors = "Resource not found", status = :not_found)
 		else
-			render json: {errors: errors, }, status: :not_found
+			json_response(errors =  errors , status = :not_found)
 		end
 	end
 
@@ -27,18 +36,19 @@ class ApplicationController < ActionController::API
 		end
 	end
 
-
 	def require_auth
 		header = request.headers['Authorization']
 		header = header.split(' ').last if header
+		auth_error = "Invalid authentication"
+		
 		begin
 		  @decoded = JsonWebToken.decode(header)
 		  @current_user = User.find(@decoded[:user_id])
 		rescue ActiveRecord::RecordNotFound => e
-			unauthorized_request(e.message)
-
+			unauthorized_request([auth_error, e.message])
 		rescue JWT::DecodeError => e
-			unauthorized_request(e.message) #Return erros: {1 : nil JSON web token}
+			unauthorized_request([auth_error, e.message]) #Return JWT errors
 		end
 	end
+
 end

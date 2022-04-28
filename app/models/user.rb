@@ -7,11 +7,11 @@ class User < ApplicationRecord
 	/x
 
 	has_secure_password
-	validates :name, presence: true,  format: {with: /\A[\p{L} ]+\z/, message: 'Can have only letters'}
+	validates :name, presence: true,  format: {with: /\A[\p{L} ]+\z/, message: 'can have only letters'}
 	validates :email, presence: true, uniqueness: {case_sensitive: false}, 
 							format: { with: URI::MailTo::EMAIL_REGEXP }
 	validates :cpf, :cpf => true, presence: true, uniqueness: true
-	validates :password, presence: true, format: { with: PASSWORD_FORMAT, }
+	validates :password, presence: true, format: { with: PASSWORD_FORMAT, message: 'must contain 6 or more characters, a digit and a letter'}
 
 
 end

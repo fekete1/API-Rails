@@ -6,12 +6,12 @@ class Api::V1::UsersController < ApplicationController
 	# GET /users
 	def index
 		@users = User.all
-		render json: @users, status: :ok
+		json_response( payload = {users: @users}, status = :ok )
 	end
 
 	# GET /users/{id}
 	def show
-		render json: @user, status: :ok
+		json_response( payload = {user: @user}, status = :ok )
 	end
 
 	# POST /sign_up
@@ -20,8 +20,8 @@ class Api::V1::UsersController < ApplicationController
 		if @user.save
 			token = JsonWebToken.encode(user_id: @user.id)
 			time = Time.now + 24.hours.to_i
-			render json: { token: token, exp: time.strftime("%m-%d-%Y %H:%M"),
-				name: @user.name}, status: :ok  #TODO melhorar a padronização de resposta
+			payload = { user: @user, token: token, exp: time.strftime("%m-%d-%Y %H:%M"), user: @user}
+			json_response( payload = payload, status = :created)
 		else
 			bad_request( errors = @user.errors.full_messages)
 		end
@@ -30,23 +30,30 @@ class Api::V1::UsersController < ApplicationController
 	# PATCH /users/{id}
 	def update
 		if @user.update(user_params) #TODO só pega se eu passar a senha
-			render json: @user, status: :ok
+			json_response( payload = @user, status = :ok)
 		else
-			render json: { errors: @user.errors.full_messages },
-				 			status: :unprocessable_entity 		#TODO trocar isso depois e padronizar
+			bad_request( errors = @user.errors.full_messages )
 		end
 	end
 
 	# DELETE /users/{id}
 	def destroy
 		@user.destroy
-		render json: @user, status: :ok
+		json_response( payload = {user: @user}, status = :ok)
 	end
-	 
+
 	def require_admin
 		unless is_admin?
 			unauthorized_request(errors = "User does not have sufficient permission administrative for this action")
 		end
+	end
+	
+	def current_user
+		return @current_user
+	end
+	
+	def is_admin?
+		return current_user.admin
 	end
 
 	private
@@ -61,11 +68,5 @@ class Api::V1::UsersController < ApplicationController
 	  params.permit(:name, :password, :email, :cpf)
 	end
 
-	def current_user
-		return @current_user
-	end
-	
-	def is_admin?
-		return current_user.admin
-	end
+
 end
